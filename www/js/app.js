@@ -5,9 +5,9 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'ngCordova'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $http, $cordovaPushV5, $rootScope) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -16,6 +16,49 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       cordova.plugins.Keyboard.disableScroll(true);
 
     }
+
+     var options = {
+        android: {
+          senderID: "1078556049697"
+        },
+        ios: {
+          alert: "true",
+          badge: "true",
+          sound: "true"
+        },
+        windows: {}
+      };
+      
+      // initialize
+      $cordovaPushV5.initialize(options).then(function() {
+        // start listening for new notifications
+        $cordovaPushV5.onNotification();
+        // start listening for errors
+        $cordovaPushV5.onError();
+        
+        // register to get registrationId
+        $cordovaPushV5.register().then(function(registrationId) {
+          console.log(registrationId);
+          $rootScope.pushId = registrationId;
+          // save `registrationId` somewhere;
+        })
+      });
+      
+      // triggered every time notification received
+      $rootScope.$on('$cordovaPushV5:notificationReceived', function(event, data){
+        // data.message,
+        // data.title,
+        // data.count,
+        // data.sound,
+        // data.image,
+        // data.additionalData
+      });
+
+      // triggered every time error occurs
+      $rootScope.$on('$cordovaPushV5:errorOcurred', function(event, e){
+        // e.message
+      });
+
     if (window.StatusBar) {
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
@@ -31,55 +74,15 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   // Each state's controller can be found in controllers.js
   $stateProvider
 
-  // setup an abstract state for the tabs directive
-    .state('tab', {
-    url: '/tab',
-    abstract: true,
-    templateUrl: 'templates/tabs.html'
-  })
-
   // Each tab has its own nav history stack:
 
-  .state('tab.dash', {
-    url: '/dash',
-    views: {
-      'tab-dash': {
-        templateUrl: 'templates/tab-dash.html',
-        controller: 'DashCtrl'
-      }
-    }
-  })
-
-  .state('tab.chats', {
-      url: '/chats',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/tab-chats.html',
-          controller: 'ChatsCtrl'
-        }
-      }
-    })
-    .state('tab.chat-detail', {
-      url: '/chats/:chatId',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
-        }
-      }
-    })
-
-  .state('tab.account', {
-    url: '/account',
-    views: {
-      'tab-account': {
-        templateUrl: 'templates/tab-account.html',
-        controller: 'AccountCtrl'
-      }
-    }
+  .state('home', {
+    url: '/home',
+    templateUrl: 'templates/home.html',
+    controller: 'HomeCtrl'
   });
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/dash');
+  $urlRouterProvider.otherwise('/home');
 
 });
